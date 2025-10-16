@@ -400,7 +400,7 @@ int main() {
   useEffect(() => {
     const connectWebSocket = () => {
       try {
-        const wsUrl = `ws://localhost:8080`;
+        const wsUrl = process.env.NEXT_PUBLIC_API_WEBSOCKET_URL || `ws://localhost:8080`;
         console.log("Connecting to WebSocket:", wsUrl);
         wss.current = new WebSocket(wsUrl);
 
@@ -453,40 +453,46 @@ int main() {
           }
 
           // Handle successful execution
-          if (response.success) {
-            const resultsToShow =
-              response.results || response.generatedResults || [];
-            console.log("Setting test results:", resultsToShow);
+          console.log("[debug] response", response);
+          
+          // Check if response is an array (direct test results) or an object with success property
+          const isDirectArray = Array.isArray(response);
+          const resultsToShow = isDirectArray 
+            ? response 
+            : (response.results || response.generatedResults || []);
+          
+          console.log("Setting test results:", resultsToShow);
 
+          if (resultsToShow.length > 0) {
             // Force update test results and switch tab
             setTestResults(resultsToShow);
             setActiveTestTab("result");
 
-            if (response.allPassed) {
+            // Check if all tests passed
+            const passedCount = resultsToShow.filter((r) => r.passed).length;
+            const totalCount = resultsToShow.length;
+            const allPassed = passedCount === totalCount;
+
+            if (allPassed) {
               toast.success("All test cases passed! 🎉", {
                 id: wasRunning ? "testCaseRun" : "codeSubmission",
                 duration: 3000,
               });
-            } else if (resultsToShow.length > 0) {
-              const passedCount = resultsToShow.filter((r) => r.passed).length;
-              const totalCount = resultsToShow.length;
-
-              if (passedCount === 0) {
-                toast.error(`All test cases failed (0/${totalCount})`, {
+            } else if (passedCount === 0) {
+              toast.error(`All test cases failed (0/${totalCount})`, {
+                id: wasRunning ? "testCaseRun" : "codeSubmission",
+                duration: 4000,
+              });
+            } else {
+              toast.error(
+                `${
+                  totalCount - passedCount
+                } test case(s) failed (${passedCount}/${totalCount} passed)`,
+                {
                   id: wasRunning ? "testCaseRun" : "codeSubmission",
                   duration: 4000,
-                });
-              } else {
-                toast.error(
-                  `${
-                    totalCount - passedCount
-                  } test case(s) failed (${passedCount}/${totalCount} passed)`,
-                  {
-                    id: wasRunning ? "testCaseRun" : "codeSubmission",
-                    duration: 4000,
-                  }
-                );
-              }
+                }
+              );
             }
           } else {
             toast.error("Code execution failed", {

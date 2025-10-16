@@ -1,6 +1,7 @@
 const WebSocket = require("ws");
 
 import ConnectDb from "@/utils/db";
+import { connectMongoose } from "@/lib/mongodb";
 import { Problem } from "@/models/problemModel";
 import { OpenAI } from "openai";
 import authChecker from "@/middleware/authChecker";
@@ -553,7 +554,13 @@ export default async function (req, res) {
     }
 
     // WebSocket communication with enhanced error handling
-    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_API_WEBSOCKET_URL}`);
+    // Use Docker service name when running in container, otherwise use env var
+    const websocketUrl = process.env.DOCKER_ENV 
+      ? 'ws://quickcode-backend:8080' 
+      : process.env.NEXT_PUBLIC_API_WEBSOCKET_URL;
+    
+    console.log('🔌 Connecting to WebSocket:', websocketUrl);
+    const ws = new WebSocket(websocketUrl);
 
     const result = await new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
@@ -577,9 +584,24 @@ export default async function (req, res) {
       ws.on("message", async (data) => {
         try {
           const result = JSON.parse(data);
-          console.log("WebSocket response received");
+          console.log("✅ WebSocket response received:", JSON.stringify(result).substring(0, 200));
+          console.log("✅ result.data exists:", !!result.data);
+          console.log("✅ result.data length:", result.data ? result.data.length : 0);
 
-          await ConnectDb();
+          if (!result.data || result.data.length === 0) {
+            console.error("❌ No test case data in WebSocket response");
+            clearTimeout(timeout);
+            ws.close();
+            resolve({
+              status: "error",
+              message: "No test case data received from execution",
+            });
+            return;
+          }
+
+          console.log("🔄 Connecting to MongoDB...");
+          await connectMongoose();
+          console.log("✅ MongoDB connected");
 
           const problemData = {
             description: problem,
@@ -614,7 +636,8 @@ export default async function (req, res) {
             testCaseCount: testCases.length,
           });
         } catch (error) {
-          console.error("Error processing WebSocket message:", error);
+          console.error("❌ Error processing WebSocket message:", error);
+          console.error("❌ Error stack:", error.stack);
           clearTimeout(timeout);
           ws.close();
           resolve({
