@@ -325,12 +325,12 @@ int main() {
       try {
         if (RQP === "true") {
           res = await axios.get(
-            `http://localhost:3000/api/problem/get?id=${id}`,
+            `${process.env.NEXT_PUBLIC_API_FRONTEND_PROBLEM}/api/problem/get?id=${id}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
         } else {
           res = await axios.get(
-            `http://localhost:3000/api/UserProblem?id=${id}`,
+            `${process.env.NEXT_PUBLIC_API_FRONTEND_PROBLEM}/api/UserProblem?id=${id}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
         }

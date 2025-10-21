@@ -168,7 +168,7 @@ export default function AddProblemForm() {
       }
 
       const res = await axios.post(
-        "http://localhost:3000/api/problem/add",
+        `${process.env.NEXT_PUBLIC_API_FRONTEND_PROBLEM}/api/problem/add`,
         {
           title,
           description,
