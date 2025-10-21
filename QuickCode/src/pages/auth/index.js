@@ -1,4 +1,4 @@
-import { X, CheckCircle, Mail, Lock } from "lucide-react";
+import { X, CheckCircle, Mail, Lock, Code2, Sparkles } from "lucide-react";
 import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/router";
@@ -7,10 +7,10 @@ import { useRouter } from "next/router";
 const Toast = ({ message, type, onClose }) => {
   return (
     <div
-      className={`fixed bottom-4 right-4 flex items-center p-4 mb-4 rounded-lg shadow-lg ${
+      className={`fixed bottom-4 right-4 flex items-center p-4 mb-4 rounded-lg shadow-lg backdrop-blur-md border ${
         type === "success"
-          ? "bg-green-100 text-green-700"
-          : "bg-red-100 text-red-700"
+          ? "bg-green-600/20 text-green-400 border-green-600/30"
+          : "bg-red-600/20 text-red-400 border-red-600/30"
       }`}
     >
       {type === "success" ? (
@@ -19,7 +19,7 @@ const Toast = ({ message, type, onClose }) => {
         <X className="w-5 h-5 mr-2" />
       )}
       <div className="text-sm font-normal">{message}</div>
-      <button onClick={onClose} className="ml-4">
+      <button onClick={onClose} className="ml-4 hover:opacity-70 transition-opacity">
         <X className="w-4 h-4" />
       </button>
     </div>
@@ -161,127 +161,173 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-900 to-gray-800 p-4">
-      <div className="w-full max-w-md bg-gray-900 text-white rounded-lg shadow-lg p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-purple-700">QuickCode</h1>
-          <p className="text-gray-600">Create and solve with friends</p>
-        </div>
+    <div className="min-h-screen w-full bg-[#0a0a0a] text-gray-200 overflow-hidden">
+      {/* Animated gradient orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-pink-600/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl"></div>
+      </div>
 
-        <div className="flex mb-6">
-          <button
-            className={`flex-1 py-2 font-medium ${
-              isSignIn
-                ? "text-purple-700 border-b-2 border-purple-700"
-                : "text-white"
-            }`}
-            onClick={() => setIsSignIn(true)}
-          >
-            Sign In
-          </button>
-          <button
-            className={`flex-1 py-2 font-medium ${
-              !isSignIn
-                ? "text-purple-700 border-b-2 border-purple-700"
-                : "text-white"
-            }`}
-            onClick={() => setIsSignIn(false)}
-          >
-            Sign Up
-          </button>
-        </div>
+      {/* Grid pattern overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.02]">
+        <div
+          className="h-full w-full"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
+            backgroundSize: "50px 50px",
+          }}
+        />
+      </div>
 
-        <form onSubmit={handleSubmit}>
-          {!isSignIn && (
-            <>
-              <div className="grid grid-cols-1 gap-4 mb-4 text-white">
-                <div>
-                  <label
-                    className="block text-gray-700 text-sm font-medium mb-2"
-                    htmlFor="name"
-                  >
-                    Name
-                  </label>
+      {/* Main Content */}
+      <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Code2 className="text-purple-400" size={32} />
+              <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                QuickCode
+              </span>
+            </div>
+            <p className="text-gray-400">Create and solve with friends</p>
+          </div>
+
+          {/* Auth Card */}
+          <div className="bg-[#1a1a1a] backdrop-blur-md rounded-xl p-8 border border-gray-800 shadow-2xl">
+
+            {/* Tab Buttons */}
+            <div className="flex mb-8 bg-[#0a0a0a] rounded-lg p-1">
+              <button
+                className={`flex-1 py-3 px-4 font-medium rounded-md transition-all duration-200 ${
+                  isSignIn
+                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+                onClick={() => setIsSignIn(true)}
+              >
+                Sign In
+              </button>
+              <button
+                className={`flex-1 py-3 px-4 font-medium rounded-md transition-all duration-200 ${
+                  !isSignIn
+                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+                onClick={() => setIsSignIn(false)}
+              >
+                Sign Up
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+              {!isSignIn && (
+                <>
+                  <div className="mb-6">
+                    <label
+                      className="block text-gray-300 text-sm font-medium mb-2"
+                      htmlFor="name"
+                    >
+                      Name
+                    </label>
+                    <input
+                      id="name"
+                      type="text"
+                      className="w-full p-3 bg-[#0a0a0a] border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                      placeholder="John Doe"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="mb-6">
+                <label
+                  className="block text-gray-300 text-sm font-medium mb-2"
+                  htmlFor="email"
+                >
+                  Email
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-gray-500" />
+                  </div>
                   <input
-                    id="name"
-                    type="text"
-                    className="w-full  p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-purple-500"
-                    placeholder="John"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
+                    id="email"
+                    type="email"
+                    className="pl-10 w-full p-3 bg-[#0a0a0a] border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                    placeholder="john@example.com"
                     required
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
-            </>
-          )}
 
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 text-sm font-medium mb-2"
-              htmlFor="email"
-            >
-              Email
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-gray-400" />
+              <div className="mb-8">
+                <label
+                  className="block text-gray-300 text-sm font-medium mb-2"
+                  htmlFor="password"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-500" />
+                  </div>
+                  <input
+                    id="password"
+                    type="password"
+                    className="pl-10 w-full p-3 bg-[#0a0a0a] border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                    placeholder="••••••••"
+                    required
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
-              <input
-                id="email"
-                type="email"
-                className="pl-10 w-full   p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-purple-500"
-                placeholder="john@example.com"
-                required
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
+
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-4 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-lg shadow-purple-600/25"
+              >
+                {isSignIn ? "Sign In" : "Create Account"}
+              </button>
+            </form>
           </div>
-
-          <div className="mb-6">
-            <label
-              className="block text-gray-700 text-sm font-medium mb-2"
-              htmlFor="password"
-            >
-              Password
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                id="password"
-                type="password"
-                className="pl-10 w-full   p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-purple-500"
-                placeholder="••••••••"
-                required
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            // onClick={handleSubmit}
-            className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-purple-700 transition duration-300"
-          >
-            {isSignIn ? "Sign In" : "Create Account"}
-          </button>
-        </form>
-
-        {toast.show && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={closeToast}
-          />
-        )}
+        </div>
       </div>
+
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={closeToast}
+        />
+      )}
+
+      <style jsx>{`
+        @keyframes gradient {
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+        .animate-gradient {
+          background-size: 200% 200%;
+          animation: gradient 3s ease infinite;
+        }
+      `}</style>
     </div>
   );
 }
