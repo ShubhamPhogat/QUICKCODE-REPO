@@ -409,28 +409,53 @@ int main() {
         };
 
         // Fixed WebSocket onmessage handler
-        wss.current.onmessage = (event) => {
-          const response = JSON.parse(event.data);
-
+        wss.current.onmessage = async (event) => {
           // Capture the current state before updating
           const wasRunning = isRunning;
           const wasSubmitting = isSubmitting;
 
           setIsRunning(false);
           setIsSubmitting(false);
-          console.log("WebSocket response:", response);
 
-          // Handle compilation errors
-          if (response.compilationError) {
-            toast.error(`Compilation Error: ${response.error}`, {
+          let response;
+          try {
+            // Handle different data types (Blob or string)
+            let data = event.data;
+            
+            if (data instanceof Blob) {
+              // If it's a Blob, convert it to text first
+              data = await data.text();
+            }
+            
+            response = JSON.parse(data);
+            console.log("WebSocket response:", response);
+          } catch (error) {
+            console.error("Failed to parse WebSocket response:", error);
+            console.error("Raw data:", event.data);
+            
+            toast.error("Failed to parse server response. Please try again.", {
               id: wasRunning ? "testCaseRun" : "codeSubmission",
               duration: 5000,
+            });
+            return;
+          }
+
+          // Handle compilation errors (status: 0 means compilation error)
+          if (response.status === 0 || response.compilationError) {
+            const errorMsg = response.msg || response.error || "Compilation failed";
+            toast.error(`Compilation Error: ${errorMsg}`, {
+              id: wasRunning ? "testCaseRun" : "codeSubmission",
+              duration: 5000,
+              style: {
+                maxWidth: '500px',
+              }
             });
             if (response.stderr) {
               console.error("Compilation stderr:", response.stderr);
             }
             return;
           }
+          
           if (response.allPassed === false && response.failedTestCase) {
             toast.error(
               `Wrong answer for ${response.failedTestCase.input} expected ${response.failedTestCase.expected} got ${response.failedTestCase.actual} `
